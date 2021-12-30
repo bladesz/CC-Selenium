@@ -5,72 +5,131 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.color import Color
+from localstorage import LocalStorage
 import time
+
+def execute(element, driver):
+	purchase_item = ActionChains(driver)\
+					.move_to_element(element)\
+					.click()\
+					.perform()
+	return
 
 service = Service("C:\Program Files (x86)\chromedriver.exe")
 options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(service=service, options=options)
-
 driver.get("https://orteil.dashnet.org/cookieclicker/")
-time.sleep(10)
-driver.implicitly_wait(5)
 
-webdriver.ActionChains(driver).key_down(Keys.CONTROL).send_keys("o").perform()
+try:
+	with open('cookie.txt', 'r') as f:
+		contents = f.readlines()
+		for i in contents:
+			driver.add_cookie(eval(i))
+	print("cookies loaded")
+	f.close()
+
+	with open('localstorage.txt', 'r') as f:
+		contents = f.readlines()
+		l = LocalStorage(driver)
+		for i in contents:
+			entry = tuple(i.strip().split(', '))
+			print(entry)
+			l[entry[0]] = entry[1]
+	print("localstorage loaded")
+	f.close()
+
+	driver.refresh()
+except:
+	print(contents)
+	print("no previous cookies")
+
+
+time.sleep(10)
+
+driver.implicitly_wait(1)
+
+''' Load function for exports
 save_file = open('exported save.txt', "r")
 contents = save_file.read()
 save_file.close()
 
+
+webdriver.ActionChains(driver).key_down(Keys.CONTROL).send_keys("o").key_up(Keys.CONTROL).perform()
 text = driver.find_element(By.XPATH,"//textarea[@id = 'textareaPrompt']")
-text_e= ActionChains(driver)
-text_e.move_to_element(text)
-text_e.click()
-text_e.perform()
-webdriver.ActionChains(driver).send_keys(contents).perform()
-
+text.send_keys(contents)
+text2 = driver.find_element(By.XPATH,"//textarea[@id = 'textareaPrompt']")
+text2.send_keys(contents)
 '''
+
 try:
-	element = WebDriverWait(driver, 10).until(
-		EC.presence_of_element_located((By.ID, "cookies"))
-	)
-
+	load = driver.find_element(By.LINK_TEXT,"Load")
+	execute(load, driver)
 except:
-	driver.quit()
-'''
+	pass
+
+try:
+	seasonal = driver.find_element(By.XPATH,"//div[@id='versionNumber']")
+	open_seasonal = ActionChains(driver)\
+				.move_to_element_with_offset(seasonal,0,-20)\
+				.click()\
+				.perform()
+	time.sleep(10)
+except:
+	print("F")
+	pass
+ 
+
+
 driver.implicitly_wait(0)
 repeat = 100000000
 while repeat > 1:
-	purchaseable = driver.find_elements(By.XPATH,"//div[@class='product unlocked enabled']")
-	for i in purchaseable[::-1]:
+
+	if repeat % 5000 == 0:
+		print("saved")
+		webdriver.ActionChains(driver).key_down(Keys.CONTROL).send_keys("s").key_up(Keys.CONTROL).perform()
+		with open('cookie.txt', 'w') as f:
+			for i in driver.get_cookies():
+				print(i, file=f)
+		f.close()
+		with open('localstorage.txt', 'w') as f:
+			storage = (LocalStorage(driver).items())
+			for key, value in storage.items():
+				print("%s, %s" % (key,value), file=f)
+		f.close()
+
+
+	try:
+			shimmers = driver.find_element(By.XPATH,"//div[@class='shimmer'][last()]")
+			execute(shimmers, driver)
+			print(repeat)
+
+	except:
+		pass
+
+	try:
+		purchaseable = driver.find_element(By.XPATH,"//div[@class='product unlocked enabled'][last()]")
+		execute(purchaseable, driver)
 		try:
-			purchase_item = ActionChains(driver)
-			purchase_item.move_to_element(i)
-			purchase_item.click()
-			purchase_item.perform()
+			festive = driver.find_element(By.XPATH,"//div[@class='optionBox']/a/div/div[@style!='color:#777']")
+			execute(festive, driver)
 
 		except:
-			time.sleep(1)
 			pass
-
-	purchaseable_upgrades = driver.find_elements(By.XPATH,"//div[@class='crate upgrade enabled']")
-	for j in purchaseable_upgrades[::-1]:
 		try:
-			purchase_upgrade = ActionChains(driver)
-			purchase_upgrade.move_to_element(j)
-			purchase_upgrade.click()
-			purchase_upgrade.perform()
-		except:
-			time.sleep(1)
-			pass
-
-	shimmers = driver.find_elements(By.XPATH,"//div[@class='shimmer']")
-	for k in shimmers[::-1]:
-		try:
-			shimmers = ActionChains(driver)
-			shimmers.move_to_element(k)
-			shimmers.click()
-			shimmers.perform()
+			purchaseable_upgrade = driver.find_element(By.XPATH,"//div[@class='crate upgrade enabled'][last()]")
+			execute(purchaseable_upgrade, driver)
 		except:
 			pass
+		
+		
+
+
+	except:
+		pass
+
+
+
+
 	#cps
 	repeat -= 1
 
