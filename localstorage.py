@@ -1,5 +1,8 @@
+'''
+From https://stackoverflow.com/questions/46361494/how-to-get-the-localstorage-with-python-and-selenium-webdriver
+'''
 class LocalStorage:
-
+    
     def __init__(self, driver) :
         self.driver = driver
 
