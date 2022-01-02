@@ -15,9 +15,8 @@ def execute(element, driver):
 					.perform()
 	return
 
-service = Service("C:\Program Files (x86)\chromedriver.exe")
 options = webdriver.ChromeOptions()
-driver = webdriver.Chrome(service=service, options=options)
+driver = webdriver.Chrome(options=options)
 driver.get("https://orteil.dashnet.org/cookieclicker/")
 
 try:
@@ -67,17 +66,10 @@ try:
 except:
 	pass
 
-try:
-	seasonal = driver.find_element(By.XPATH,"//div[@id='versionNumber']")
-	open_seasonal = ActionChains(driver)\
-				.move_to_element_with_offset(seasonal,0,-20)\
-				.click()\
-				.perform()
-	time.sleep(10)
-except:
-	print("F")
-	pass
- 
+
+time.sleep(10)
+
+
 
 
 driver.implicitly_wait(0)
@@ -108,26 +100,30 @@ while repeat > 1:
 
 	try:
 		purchaseable = driver.find_element(By.XPATH,"//div[@class='product unlocked enabled'][last()]")
-		execute(purchaseable, driver)
-		try:
-			festive = driver.find_element(By.XPATH,"//div[@class='optionBox']/a/div/div[@style!='color:#777']")
-			execute(festive, driver)
-
-		except:
-			pass
+		
 		try:
 			purchaseable_upgrade = driver.find_element(By.XPATH,"//div[@class='crate upgrade enabled'][last()]")
 			execute(purchaseable_upgrade, driver)
 		except:
 			pass
-		
-		
 
+		try:
+			festive = driver.find_element(By.XPATH,"//div[@class='optionBox']/a/div/div")
+			if Color.from_string(festive.value_of_css_property("color")) != "rgba(204, 204, 204, 1)":
+				execute(festive, driver)
+		except:
+			try:
+				seasonal = driver.find_element(By.XPATH,"//div[@id='versionNumber']")
+				open_seasonal = ActionChains(driver)\
+				.move_to_element_with_offset(seasonal,0,-20)\
+				.click()\
+				.perform()
+			except:
+				print("F Didn't load in time")
+		execute(purchaseable, driver)
 
 	except:
 		pass
-
-
 
 
 	#cps
